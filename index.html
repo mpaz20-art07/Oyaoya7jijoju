@@ -847,13 +847,15 @@ window.saveItem = async function(item) {
 // --- Listener en tiempo real ---
 onSnapshot(collection(db, "posters"), (snapshot) => {
   const newItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  newItems.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  newItems.sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
   state.items = newItems;
 
   // Refresca la vista solo si no estás escribiendo en un input
-  if (!document.activeElement || document.activeElement.tagName !== 'INPUT') {
-    render();
-  }
+  if (!document.activeElement 
+    || (document.activeElement.tagName !== 'INPUT' 
+        && document.activeElement.tagName !== 'TEXTAREA')) {
+  render();
+}
 });
 
 // --- Login con Google ---
