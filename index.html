@@ -780,13 +780,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAryB4erEaKzVvoanroPYUTR5R2Gkxfbfw",
-  authDomain: "biblioteca-de-anime.firebaseapp.com",
-  projectId: "biblioteca-de-anime",
-  storageBucket: "biblioteca-de-anime.firebasestorage.app",
-  messagingSenderId: "669443336610",
-  appId: "1:669443336610:web:f581882586b1eb862feafb",
-  measurementId: "G-X2FSRD2VS6"
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
