@@ -375,7 +375,7 @@ function render(){
       const hay = (it.name||'').toLowerCase().includes(q)
         || (it.genre||'').toLowerCase().includes(q)
         || (it.extra||'').toLowerCase().includes(q)
-        || (it.order !== undefined ? String(it.order).toLowerCase().includes(q) : false)
+        || (it.extra||'').toLowerCase().includes(q)
       if(!hay) return false;
     }
     return true;
@@ -500,7 +500,7 @@ function renderDetails(it){
     body.appendChild(fieldTextarea('Progreso para terminar', it.progress||'', v=> updateItem(it.id,{progress:v})));
     body.appendChild(fieldYesNoWithText('Película', it.movie||{has:false,text:''}, v=> updateItem(it.id,{movie:v})));
     body.appendChild(fieldYesNoWithText('Ova', it.ova||{has:false,text:''}, v=> updateItem(it.id,{ova:v})));
-    body.appendChild(fieldTextarea('Orden Cronológico', it.order||'', v=> updateItem(it.id,{order:v})));
+    body.appendChild(fieldTextarea('Orden Cronológico', it.ordenCronologico||'', v=> updateItem(it.id,{ordenCronologico:v})));
   }else if(['Manga','Manhwa','Manhua'].includes(it.category)){
     body.appendChild(fieldText('Último capitulo visto', it.lastChapter||'', v=> updateItem(it.id,{lastChapter:v})));
     body.appendChild(fieldTextarea('Contenido Adicional', it.extra||'', v=> updateItem(it.id,{extra:v})));
@@ -655,7 +655,7 @@ async function reorderWithinCurrentView(draggedId, targetId){
         const hay = (it.name||'').toLowerCase().includes(q)
           || (it.genre||'').toLowerCase().includes(q)
           || (it.extra||'').toLowerCase().includes(q)
-          || (it.order||'').toLowerCase().includes(q);
+          || (it.extra||'').toLowerCase().includes(q);
         if(!hay) return false;
       }
       return true;
@@ -804,7 +804,8 @@ window.addItem = async function() {
     cover: '',
     genre: '',
     person: 'Todos',
-    order: state.items.length // número secuencial
+    order: state.items.length,   // 👈 sigue existiendo para drag & drop
+    ordenCronologico: ''         // 👈 nuevo campo editable de texto
   };
 
   if(cat === 'Pendientes en General'){
@@ -847,7 +848,8 @@ window.saveItem = async function(item) {
 // --- Listener en tiempo real ---
 onSnapshot(collection(db, "posters"), (snapshot) => {
   const newItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  newItems.sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
+  // Ordenar por el campo interno 'order' (drag & drop)
+  newItems.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   state.items = newItems;
 
   // Refresca la vista solo si no estás escribiendo en un input
