@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Biblioteca de Anime</title>
+<style>
+  :root{
+  --bg: #0b0f14;
+  --panel: #121826;
+  --card: #0f1624;
+  --text: #e6e6f0;
+  --muted: #9aa3b2;
+  --accent: #7c4dff;
+  --accent-2: #a78bfa;
+  --danger: #ff5c7a;
+  --ok: #3ddc97;
+  --warn: #ffd166;
+  --gap: 20px;
+  --poster-w: 305px;   /* ancho del póster */
+  --poster-h: 570px;   /* alto del póster */
+  --radius: 14px;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+  .theme-violet {
+    --bg: #0a0a0f;
+    --panel: #0f1020;
+    --card: #12122a;
+    --text: #f0eaff;
+    --muted: #bfb7d9;
+    --accent: #8b5cf6;
+    --accent-2: #c4b5fd;
+  }
+  html,body{height:100%;}
+  body {
+  margin: 0;
+  background: var(--bg) center/cover fixed no-repeat;
+  color: var(--text);
+  font-family: Georgia, serif;
+}
+  .app{display:grid; grid-template-columns: 280px 1fr; min-height:100vh;}
+
+  /* Sidebar */
+  .sidebar{
+    background: var(--panel);
+    border-right: 1px solid #1f2433;
+    padding: 20px;
+    position: sticky; top:0;
+  }
+  .sidebar h2{margin:0 0 12px;font-size:18px;}
+  .sidebar-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.sidebar-logo img {
+  max-width: 100%;
+  height: auto;
+}
+  .sidebar button, .sidebar .cat{
+    width:100%; margin:6px 0; padding:10px 12px; border-radius:10px;
+    border:1px solid #232a3a; background:#0e1422; color:var(--text); cursor:pointer;
+  }
+  .sidebar .cat.active{border-color:var(--accent); box-shadow:0 0 0 2px inset var(--accent);}
+  .sidebar .small{font-size:12px;color:var(--muted);}
+  .sidebar.collapsed{width:72px; grid-column:1/2; padding:12px;}
+  .sidebar.collapsed .hide-when-collapsed{display:none;}
+
+  /* Top bar */
+  .main{display:flex; flex-direction:column;}
+  .top{
+    position:sticky; top:0; z-index:10;
+    background: linear-gradient(180deg, rgba(10,12,18,.95), rgba(10,12,18,.75));
+    backdrop-filter: blur(6px);
+    border-bottom:1px solid #1f2433;
+  }
+  .top-inner{padding:16px; display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
+  .title{font-size:28px; font-weight:700; letter-spacing:.3px;}
+  .filters, .special{display:flex; gap:8px; flex-wrap:wrap;}
+  .chip{
+    padding:8px 12px; border-radius:999px; border:1px solid #232a3a;
+    background:#0e1422; color:var(--text); cursor:pointer;
+  }
+  .chip.active{border-color:var(--accent); background:#1a1f33;}
+  .chip:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.chip.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+  .spacer{flex:1;}
+  .search {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 16px;       /* separa del bloque superior */
+  margin-bottom: 16px;    /* separa del bloque inferior */
+  margin-left: 20px;
+}
+.search input {
+  width: 260px;
+  max-width: 40vw;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--accent);   /* borde violeta */
+  background: #0e1422;
+  color: var(--text);
+  box-shadow: 0 0 0 2px inset var(--accent); /* efecto resaltado como categorías */
+}
+.search button {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--accent);
+  background: #1a1f33;
+  color: var(--text);
+  cursor: pointer;
+}
+.search button:hover {
+  background: var(--accent);
+  color: #fff;
+}
+  .btn.danger{border-color:var(--danger); color:#ffdfe6;}
+
+  /* Grid fijo de 6 columnas y 2 filas visibles */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(6, var(--poster-w)); /* 6 columnas fijas */
+  gap: 16px;
+  padding: 20px; /* margen interno para que no toquen los bordes */
+}
+
+  /* Card póster */
+  .card{
+  width: var(--poster-w);
+  height: var(--poster-h);
+  background: linear-gradient(180deg, #0f1624, #0b1220);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border:1px solid #1f2433;
+  display:flex; flex-direction:column; overflow:hidden;
+  position:relative; cursor:pointer;
+}
+.card .cover{
+  height: 80%;
+  background:#111;
+  background-position:center;
+  background-size: contain; /* imagen completa sin recorte */
+}
+.card .meta{
+  padding:8px 10px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size: 14px; /* un poco más grande */
+}
+.card .name{font-weight:700;font-size: 16px; /* nombre más visible */}
+  .badge{display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--muted);}
+  .status-visto{color:var(--ok);}
+  .status-novisto{color:#9bd1ff;}
+  .status-falta{color:var(--warn);}
+
+  /* Carta “+” única */
+  .card.add-card{
+    display:flex; align-items:center; justify-content:center;
+    font-size:64px; font-weight:800; color:var(--accent);
+    background:rgba(124,77,255,.1);
+    border:1px dashed var(--accent);
+  }
+  .card.add-card:hover{background:rgba(124,77,255,.2);}
+
+  /* Panel de detalles */
+  .details{
+    position: fixed; right: 20px; top: 80px; bottom: 20px;
+    width: 420px; max-width: 90vw; background: var(--panel);
+    border:1px solid #1f2433; border-radius: 16px; box-shadow: var(--shadow);
+    display:none; overflow:auto; z-index: 3000;
+  }
+  .details.visible{display:block;}
+  .details-header{
+    position:sticky; top:0; background:linear-gradient(180deg, rgba(18,24,38,.95), rgba(18,24,38,.75));
+    backdrop-filter: blur(6px);
+    padding:12px; border-bottom:1px solid #1f2433;
+    display:flex; gap:8px; align-items:center; justify-content:space-between;
+  }
+  .details-body{padding:12px; display:flex; flex-direction:column; gap:12px;}
+  .details .poster-preview{
+    width:100%; height:320px; border-radius:12px; background:#111; background-size:cover; background-position:center;
+    border:1px solid #232a3a;
+  }
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:13px; color:var(--muted);}
+  .field input[type="textarea"], .field textarea, .field select, .field input[type="number"]{
+    padding:10px 12px; border-radius:10px; border:1px solid #232a3a; background:#0e1422; color:var(--text);
+  }
+  .field input[type="text"],
+.field textarea {
+  width: 100%;              /* ocupa todo el ancho */
+  box-sizing: border-box;   /* incluye padding/border en el ancho */
+  min-height: 20px;
+  resize: vertical;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #232a3a;
+  background: #0e1422;
+  color: var(--text);
+}
+
+  .row{display:flex; gap:8px; flex-wrap:wrap;}
+  .row .field{flex:1;}
+
+  /* Configuración */
+  .settings{
+    position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: 520px; max-width: 95vw; background: var(--panel);
+    border:1px solid #1f2433; border-radius:16px; box-shadow: var(--shadow);
+    display:none; overflow:hidden;
+  }
+  .settings.visible{display:block;}
+  .settings-header{padding:12px; border-bottom:1px solid #1f2433; display:flex; justify-content:space-between; align-items:center;}
+  .settings-body{padding:12px; display:flex; flex-direction:column; gap:12px;}
+</style>
+  <script type="module" crossorigin src="/Oyaoya7jijoju/assets/index-DZ0c6wHC.js"></script>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <img src="https://i.pinimg.com/736x/3d/29/12/3d2912c18c13923c3b86fcf99c6d500b.jpg" alt="Logo Biblioteca de Anime">
+      </div>
+      <h2 class="hide-when-collapsed">Categorías</h2>
+      <button class="cat active" data-cat="Anime">Anime</button>
+      <button class="cat" data-cat="Manga">Manga</button>
+      <button class="cat" data-cat="Películas">Películas</button>
+      <button class="cat" data-cat="Manhwa">Manhwa</button>
+      <button class="cat" data-cat="Manhua">Manhua</button>
+      <button class="cat" data-cat="Pendientes en General">Pendientes en General</button>
+
+      <div class="hide-when-collapsed" style="margin-top:16px;">
+        <button class="btn" id="openSettings">Configuración</button>
+        <div class="field">
+          <button class="chip" id="loginGoogle">Iniciar sesión con Google</button>
+          <button class="chip" id="logoutGoogle">Cerrar sesión</button>
+          <div style="margin-top:8px; display:flex; align-items:center; gap:8px;">
+            <img id="userPhoto" alt="Foto de usuario" style="width:40px; height:40px; border-radius:50%; display:none;">
+            <span id="userName"></span>
+            <span id="sessionStatus" style="margin-left:12px; color:var(--muted);"></span>
+          </div>
+        </div>        
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="top">
+        <div class="top-inner">
+          <div class="title">Biblioteca de Anime</div>
+    
+          <!-- Filtros por estado (arriba junto al título) -->
+          <div class="filters" id="stateFilters">
+            <button class="chip" id="showAll">Todos</button>
+            <button class="chip" data-state="Visto">Visto</button>
+            <button class="chip" data-state="No visto">No visto</button>
+            <button class="chip" data-state="Falta terminar">Falta terminar</button>
+          </div>
+          <!-- Filtros especiales por persona -->
+      <div class="special" id="personFilters">
+        <button class="chip" data-person="Maria Paz">Maria Paz</button>
+        <button class="chip" data-person="Milena">Milena</button>
+        <button class="chip" data-person="Maria Paz y Milena">Maria Paz y Milena</button>
+      </div>
+    </div>
+  </div>
+    
+      <!-- Buscador global (ahora en el mismo sector que los filtros) -->
+      <div class="search">
+        <input type="text" id="searchInput" placeholder="Buscar..." />
+        <button class="btn" id="searchButton">Buscar</button>
+      </div>
+    
+      <!-- Contenedor de pósters -->
+      <section class="columns" id="columns"></section>
+    </main>    
+  </div> <!-- cierre de .app -->
+
+  <!-- Configuración (overlay independiente) -->
+  <div class="settings" id="settings">
+    <div class="settings-header">
+      <strong>Configuración</strong>
+      <button class="chip" id="closeSettings">Cerrar</button>
+    </div>
+    <div class="settings-body">
+      <div class="field">
+        <label>Tema</label>
+        <select id="themeSelect">
+          <option value="default">Negro con todos violetas (por defecto)</option>
+          <option value="violet">Negro con todos violetas (intenso)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Poner una imagen de fondo</label>
+        <input type="file" id="bgUpload" accept="image/*" />
+        <small class="small"></small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel de detalles (overlay independiente) -->
+  <aside class="details" id="details">
+    <div class="details-header">
+      <strong>Detalles</strong>
+      <div>
+        <button class="chip" id="closeDetails">Cerrar</button>
+        <button class="chip danger" id="deleteItem">Eliminar</button>
+      </div>
+    </div>
+    <div class="details-body" id="detailsBody"></div>
+  </aside>
+
+</body>
+</html>
